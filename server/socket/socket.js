@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
         socket.join(usuarioEntrante.sala);
         let usuarios = usuario.setUsuario(socket.id, usuarioEntrante.nombre, usuarioEntrante.sala);
         socket.broadcast.to(usuarioEntrante.sala).emit('listaPersonas', usuario.getUsuariosPorSala(usuarioEntrante.sala));
+        socket.broadcast.to(usuarioEntrante.sala).emit('crearMensaje', crearMensaje('Administrador', `Usuario ${usuarioEntrante.nombre} entro`));
 
         if(callback) callback(usuario.getUsuariosPorSala(usuarioEntrante.sala));
     });
@@ -48,10 +49,12 @@ io.on('connection', (socket) => {
      * Escucha mensaje y transmite a todos
      * socket.emit('crearMensaje',{mensaje:'mensaje a recibir'});
      */
-    socket.on('crearMensaje', (data) => {
+    socket.on('crearMensaje', (data, callback) => {
         let usuarioEnvia = usuario.getUsuario(socket.id);
         let mensaje = crearMensaje( usuarioEnvia.nombre, data.mensaje);
         socket.broadcast.to(usuarioEnvia.sala).emit('crearMensaje', mensaje);
+
+        callback(mensaje);
     });
 
     /**
